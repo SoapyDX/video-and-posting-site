@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta id="isAdminMeta" name="isAdmin" content="false"> <!-- Default to false -->
+    <title>Video Upload Platform</title>
+    <style>
+        #videos-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .video-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 200px; /* Adjust as needed */
+        }
+        
+        #posts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .post {
+            background-color: #fafafa;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+        
+        .video-username, .post-username {
+            color: #555;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        Video Upload Platform
+    </header>
+
+    <main>
+        <section id="auth-section">
+            <h2>Login / Register</h2>
+            <form id="login-form" action="/login" method="post">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <hr>
+            <form id="register-form" action="/register" method="post">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Register</button>
+            </form>
+            <hr>
+            <form id="logout-form" action="/logout" method="post">
+                <button type="submit">Logout</button>
+            </form>
+        </section>
+
+        <section id="upload-section">
+            <h2>Upload Your Video</h2>
+            <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="video" accept="video/*" required>
+                <button type="submit">Upload Video</button>
+            </form>
+        </section>
+
+        <section id="post-section">
+            <h2>Create a Post</h2>
+            <form id="post-form" action="/post" method="post">
+                <textarea name="content" placeholder="Write your post..." rows="4" required></textarea>
+                <button type="submit">Post</button>
+            </form>
+        </section>
+    </main>
+
+    <main>
+        <section id="video-section">
+            <h2>Uploaded Videos</h2>
+            <div id="videos-container">
+                <!-- Uploaded videos will appear here -->
+            </div>
+        </section>
+
+        <section id="post-section">
+            <h2>Posts</h2>
+            <div id="posts-container">
+                <!-- Posts will appear here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2024 Video Upload Platform
+    </footer>
+
+    <script>
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/current-user');
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const user = await response.json();
+                document.getElementById('isAdminMeta').content = user.isAdmin ? 'true' : 'false';
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        async function loadVideos() {
+            try {
+                const response = await fetch('/videos');
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const videos = await response.json();
+                const container = document.getElementById('videos-container');
+                container.innerHTML = ''; // Clear the container
+    
+                videos.forEach(video => {
+                    const videoWrapper = document.createElement('div');
+                    videoWrapper.classList.add('video-wrapper');
+    
+                    const videoElement = document.createElement('video');
+                    videoElement.controls = true;
+                    videoElement.src = `/uploads/${video.filename}`;
+                    videoElement.style.maxWidth = '200px'; // Adjust as needed
+    
+                    const username = document.createElement('p');
+                    username.classList.add('video-username');
+                    username.innerText = `Uploaded by: ${video.userId.username}`;
+    
+                    videoWrapper.appendChild(videoElement);
+                    videoWrapper.appendChild(username);
+    
+                    if (document.querySelector('meta[name="isAdmin"]').content === 'true') {
+                        const deleteButton = document.createElement('button');
+                        deleteButton.innerText = 'Delete';
+                        deleteButton.style.marginTop = '10px';
+                        deleteButton.onclick = async () => {
+                            await fetch(`/delete-video/${video._id}`, { method: 'POST' });
+                            loadVideos(); // Refresh the list after deletion
+                        };
+                        videoWrapper.appendChild(deleteButton);
+                    }
+    
+                    container.appendChild(videoWrapper);
+                });
+            } catch (error) {
+                console.error('Error loading videos:', error);
+            }
+        }
+    
+        async function loadPosts() {
+            try {
+                const response = await fetch('/posts');
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const posts = await response.json();
+                const container = document.getElementById('posts-container');
+                container.innerHTML = ''; // Clear the container
+    
+                posts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.classList.add('post');
+                    postElement.innerHTML = `<p>${post.content}</p>`;
+    
+                    const username = document.createElement('p');
+                    username.classList.add('post-username');
+                    username.innerText = `Posted by: ${post.userId.username}`;
+    
+                    postElement.appendChild(username);
+    
+                    if (document.querySelector('meta[name="isAdmin"]').content === 'true') {
+                        const deleteButton = document.createElement('button');
+                        deleteButton.innerText = 'Delete';
+                        deleteButton.style.marginTop = '10px';
+                        deleteButton.onclick = async () => {
+                            await fetch(`/delete-post/${post._id}`, { method: 'POST' });
+                            loadPosts(); // Refresh the list after deletion
+                        };
+                        postElement.appendChild(deleteButton);
+                    }
+    
+                    container.appendChild(postElement);
+                });
+            } catch (error) {
+                console.error('Error loading posts:', error);
+            }
+        }
+    
+        window.onload = async () => {
+            await loadUserInfo(); // Load user info first
+            loadVideos();
+            loadPosts();
+        };
+    </script>
+    
+</body>
+</html>
