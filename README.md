@@ -17,3 +17,15 @@ To run this project locally, you will need the following:
 - **Node.js:** Version 14 or later.
 - **MongoDB:** A running instance of MongoDB.
 - **npm or yarn:** For managing dependencies.
+
+## Dependencies
+
+The project requires the following npm packages:
+
+- **express:** Web framework for Node.js.
+- **mongoose:** MongoDB object modeling tool.
+- **express-session:** Middleware for session management.
+- **connect-mongo:** MongoDB session store for Express sessions.
+- **path:** Node.js module for handling file paths.
+- **multer:** Middleware for handling file uploads.
+- **fs:** Node.js module for file system operations.
