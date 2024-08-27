@@ -1,8 +1,8 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const Video = require('../models/Video'); // Assuming you have a Video model
-const authMiddleware = require('../middleware/auth'); // Authentication middleware
+const Video = require('../models/Video');
+const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });

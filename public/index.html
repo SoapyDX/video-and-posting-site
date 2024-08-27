@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 200px; /* Adjust as needed */
+            max-width: 200px;
         }
         
         #posts-container {
@@ -120,7 +120,7 @@
                 if (!response.ok) throw new Error('Network response was not ok.');
                 const videos = await response.json();
                 const container = document.getElementById('videos-container');
-                container.innerHTML = ''; // Clear the container
+                container.innerHTML = '';
     
                 videos.forEach(video => {
                     const videoWrapper = document.createElement('div');
@@ -129,7 +129,7 @@
                     const videoElement = document.createElement('video');
                     videoElement.controls = true;
                     videoElement.src = `/uploads/${video.filename}`;
-                    videoElement.style.maxWidth = '200px'; // Adjust as needed
+                    videoElement.style.maxWidth = '200px';
     
                     const username = document.createElement('p');
                     username.classList.add('video-username');
@@ -144,7 +144,7 @@
                         deleteButton.style.marginTop = '10px';
                         deleteButton.onclick = async () => {
                             await fetch(`/delete-video/${video._id}`, { method: 'POST' });
-                            loadVideos(); // Refresh the list after deletion
+                            loadVideos();
                         };
                         videoWrapper.appendChild(deleteButton);
                     }
@@ -162,7 +162,7 @@
                 if (!response.ok) throw new Error('Network response was not ok.');
                 const posts = await response.json();
                 const container = document.getElementById('posts-container');
-                container.innerHTML = ''; // Clear the container
+                container.innerHTML = '';
     
                 posts.forEach(post => {
                     const postElement = document.createElement('div');
@@ -181,7 +181,7 @@
                         deleteButton.style.marginTop = '10px';
                         deleteButton.onclick = async () => {
                             await fetch(`/delete-post/${post._id}`, { method: 'POST' });
-                            loadPosts(); // Refresh the list after deletion
+                            loadPosts();
                         };
                         postElement.appendChild(deleteButton);
                     }
@@ -194,7 +194,7 @@
         }
     
         window.onload = async () => {
-            await loadUserInfo(); // Load user info first
+            await loadUserInfo();
             loadVideos();
             loadPosts();
         };
