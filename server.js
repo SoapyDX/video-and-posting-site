@@ -32,7 +32,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Storage for uploaded videos
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
@@ -44,9 +43,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Routes
-
-// Register
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -59,7 +55,6 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// Login
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
@@ -71,13 +66,11 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Logout
 app.post('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
 });
 
-// Upload Video
 app.post('/upload', upload.single('video'), async (req, res) => {
     if (!req.session.user) {
         return res.status(401).send('You must be logged in to upload videos.');
@@ -88,13 +81,11 @@ app.post('/upload', upload.single('video'), async (req, res) => {
     res.redirect('/');
 });
 
-// Get Videos
 app.get('/videos', async (req, res) => {
     const videos = await Video.find().populate('userId');
     res.json(videos);
 });
 
-// Create Post
 app.post('/post', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).send('You must be logged in to make a post.');
@@ -105,16 +96,14 @@ app.post('/post', async (req, res) => {
     res.redirect('/');
 });
 
-// Get Posts
 app.get('/posts', async (req, res) => {
     const posts = await Post.find().populate('userId');
     res.json(posts);
 });
 
 app.get('/', (req, res) => {
-    // Check if user is logged in and has admin privileges
     const isAdmin = req.session.user && req.session.user.isAdmin;
-    res.render('index', { isAdmin }); // Pass isAdmin value to the view
+    res.render('index', { isAdmin });
 });
 
 // Get current user info
@@ -134,7 +123,6 @@ app.get('/current-user', (req, res) => {
 
 
 
-// Delete Video (Admin only)
 app.post('/delete-video/:id', async (req, res) => {
     if (!req.session.user || !req.session.user.isAdmin) {
         return res.status(403).send('You must be an admin to delete videos.');
@@ -154,7 +142,6 @@ app.post('/delete-video/:id', async (req, res) => {
     }
 });
 
-// Delete Post (Admin only)
 app.post('/delete-post/:id', async (req, res) => {
     if (!req.session.user || !req.session.user.isAdmin) {
         return res.status(403).send('You must be an admin to delete posts.');
@@ -169,7 +156,6 @@ app.post('/delete-post/:id', async (req, res) => {
     }
 });
 
-// Serve uploaded videos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.listen(port, () => {
